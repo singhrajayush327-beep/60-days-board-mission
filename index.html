@@ -62,6 +62,7 @@ const subjects={
 };
 const defaults={Maths:5,Physics:4,Chemistry:4,Hindi:2,English:2};
 let state=load(),activeSubject='Maths',view='daily',selectedDay=0;
+const $ = id => document.getElementById(id);
 function load(){try{return JSON.parse(localStorage.getItem(KEY))||{}}catch(e){return {}}}
 function save(){localStorage.setItem(KEY,JSON.stringify(state))}
 function dateAt(i){let d=new Date(START+'T12:00:00');d.setDate(d.getDate()+i);return d}
