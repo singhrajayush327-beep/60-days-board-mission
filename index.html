@@ -60,7 +60,13 @@ const subjects={
 'Poetry 1 – Sweetest Love, I Do Not Goe','Poetry 2 – Song of Myself','Poetry 3 – Now The Leaves Are Falling Fast','Poetry 4 – Ode to Autumn','Poetry 5 – An Epitaph','Poetry 6 – The Soldier','Poetry 7 – Macavity: The Mystery Cat','Poetry 8 – Fire-Hymn','Poetry 9 – Snake','Poetry 10 – My Grandmother’s House',
 'Story of English','Grammar','Letter Writing & Application','Essay','Passage','Precis']
 };
-const defaults={Maths:5,Physics:4,Chemistry:4,Hindi:2,English:2};
+const planDays={
+Maths:[4,3,4,6,5,10,4,4,5,6,3,6],
+Physics:[6,5,5,5,2,5,5,2,7,4,3,3,3,4,1],
+Chemistry:[3,5,6,4,2,3,6,3,6,3,4,6,3,2,2,1,1],
+Hindi:[1,2,2,2,1,1,2,2,1,2,2,2,1,2,2,2,1,1,2,2,1,2,1,2,1,2,1,1,1,5,2,4,4],
+English:[2,2,2,3,3,2,2,3,2,3,2,2,3,2,2,2,2,2,2,3,2,2,2,2,2,2,2]
+};
 let state=load(),activeSubject='Maths',view='daily',selectedDay=0;
 const $ = id => document.getElementById(id);
 function load(){try{return JSON.parse(localStorage.getItem(KEY))||{}}catch(e){return {}}}
@@ -69,9 +75,28 @@ function dateAt(i){let d=new Date(START+'T12:00:00');d.setDate(d.getDate()+i);re
 function fmt(d,opt={day:'numeric',month:'short',year:'numeric'}){return d.toLocaleDateString('en-IN',opt)}
 function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function init(){
- if(!state.chapters){state.chapters={};for(let s in subjects)state.chapters[s]=subjects[s].map((name,i)=>({id:s+'-'+i,name,days:defaults[s],done:false}));}
- if(!state.checks)state.checks={};if(!state.targets)state.targets={};if(!state.revisions)state.revisions={};if(!state.revisionChecks)state.revisionChecks={};
- buildSchedules();render();
+ if(!state.chapters){
+  state.chapters={};
+  for(let s in subjects){
+   state.chapters[s]=subjects[s].map((name,i)=>({
+    id:s+'-'+i,name,days:planDays[s][i],done:false
+   }));
+  }
+ }
+ if(state.weightVersion!==2){
+  for(let s in planDays){
+   state.chapters[s].forEach((c,i)=>{
+    c.days=planDays[s][i];
+   });
+  }
+  state.weightVersion=2;
+ }
+ if(!state.checks)state.checks={};
+ if(!state.targets)state.targets={};
+ if(!state.revisions)state.revisions={};
+ if(!state.revisionChecks)state.revisionChecks={};
+ buildSchedules();
+ render();
 }
 function buildSchedules(){
  state.schedule={};
