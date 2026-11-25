@@ -23,9 +23,14 @@ header,.wrap{max-width:1100px;margin:auto;padding-left:16px;padding-right:16px}h
 input,button,select{font:inherit}button{cursor:pointer}.hidden{display:none!important}.empty{padding:14px 0;color:var(--muted);font-size:12px}.note{font-size:10px;color:var(--muted);margin-top:10px;line-height:1.5}
 footer{text-align:center;color:#72839f;font-size:10px;padding:22px}
 @media(max-width:760px){.layout{grid-template-columns:1fr}.today{font-size:24px}.stats{gap:6px}.stat{padding:8px}.stat b{font-size:18px}}
+
+#studyPanel{margin-top:13px}.timerDisplay{font-size:32px;font-weight:900;letter-spacing:1px;font-variant-numeric:tabular-nums;margin:12px 0;color:var(--green)}.studyControls{display:flex;gap:8px;flex-wrap:wrap}.reportTabs{display:flex;gap:7px;margin:14px 0 8px}.reportTab{background:#0b1423;border:1px solid var(--line);color:var(--txt);padding:7px 12px;border-radius:9px;font-size:11px}.reportTab.active{background:#284b7d;border-color:#5888c5}.studyBars{display:flex;align-items:end;gap:5px;height:120px;padding:10px 0 3px;border-bottom:1px solid var(--line)}.studyBarCol{flex:1;min-width:0;height:100%;display:flex;flex-direction:column;justify-content:end;align-items:center;gap:5px}.studyBar{width: min(100%,24px);min-height:2px;background:linear-gradient(180deg,var(--blue),var(--green));border-radius:5px 5px 2px 2px}.studyBarCol small{font-size:9px;color:var(--muted)}.studySummary{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:12px}.studySummary .stat{padding:9px}.studySummary .stat b{font-size:17px}.updateNotice{position:fixed;left:12px;right:12px;bottom:12px;z-index:20;max-width:520px;margin:auto;background:#1c3150;border:1px solid #6c91c7;border-radius:14px;padding:12px;box-shadow:0 10px 35px #0009;display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:12px}.intro{position:fixed;inset:0;z-index:100;background:radial-gradient(ellipse at center,#1d3154,#080d18 70%);display:flex;align-items:center;justify-content:center;flex-direction:column;transition:opacity .5s ease}.intro.hide{opacity:0;pointer-events:none}.introBrand{font-size:clamp(22px,5vw,34px);font-weight:800;letter-spacing:5px;opacity:0;animation:introText .8s ease forwards}.introYear{font-size:clamp(54px,14vw,92px);font-weight:950;letter-spacing:5px;color:#eaf2ff;opacity:0;transform:translateY(12px);animation:introYear 1s .45s ease forwards}.introLine{width:0;height:2px;margin-top:12px;background:linear-gradient(90deg,transparent,#79aaff,#59d6a0,transparent);box-shadow:0 0 14px #79aaff;animation:introLine .9s 1s ease forwards}@keyframes introText{to{opacity:1}}@keyframes introYear{to{opacity:1;transform:translateY(0)}}@keyframes introLine{to{width:min(220px,55vw)}} 
+
 </style>
 </head>
 <body>
+<div class="intro" id="introScreen"><div class="introBrand">BOARD MISSION</div><div class="introYear">2027</div><div class="introLine"></div></div>
+<div class="updateNotice hidden" id="updateNotice"><span>✨ नया अपडेट उपलब्ध है</span><button class="btn primary" id="updateNow">Update</button></div>
 <header><div><div class="logo">60 DAYS <span>／</span> BOARD MISSION</div><div class="tag">YOUR OFFLINE STUDY COMMAND CENTER</div></div><button class="btn" id="backup">Backup ↓</button></header>
 <div class="wrap">
 <section class="hero">
@@ -41,6 +46,15 @@ footer{text-align:center;color:#72839f;font-size:10px;padding:22px}
 <section id="calendarView" class="card hidden"><div class="dayhead"><div><h2>60-Day Calendar</h2><div class="muted">किसी तारीख पर टैप करके उस दिन का पूरा plan देखें।</div></div><span class="pill">25 NOV – 23 JAN</span></div><div id="calendarGrid" class="calendar"></div></section>
 <section id="subjectsView" class="card hidden"><div class="dayhead"><div><h2>Subjects & Chapters</h2><div class="muted">हर chapter के लिए निर्धारित दिन बदल सकते हैं। Schedule फिर से बनेगा।</div></div><button class="btn primary" id="rebuild">Rebuild plan</button></div><div class="tabs" id="subjectTabs"></div><div id="chapterEditor"></div><div class="note">ध्यान दें: किसी chapter के दिन बदलने पर उसी subject का 60-दिन का schedule दोबारा बाँटा जाएगा। पाँचों subjects रोज़ schedule में रहेंगे।</div></section>
 <section class="card" style="margin-top:13px"><h2>Progress & Backup</h2><div class="muted">आपका progress इसी device के browser में save होता है। Backup डाउनलोड करके सुरक्षित रखें।</div><div class="actions"><button class="btn" id="exportBtn">Export backup</button><label class="btn">Import backup<input type="file" id="importFile" accept="application/json" hidden></label><button class="btn" id="resetBtn">Reset progress</button></div><div class="note">Offline support: इस ऐप को पहली बार इंटरनेट रहते हुए install/open करें। उसके बाद cached app बिना इंटरनेट चलेगा।</div></section>
+<section class="card" id="studyPanel">
+ <div class="dayhead"><div><h2>⏱️ Study Stopwatch</h2><div class="muted">एक ही timer पूरे study session के लिए। App बंद होने पर भी समय सुरक्षित रहेगा।</div></div><span class="pill" id="timerStatus">STOPPED</span></div>
+ <div class="timerDisplay" id="timerDisplay">00:00:00</div>
+ <div class="studyControls"><button class="btn primary" id="timerToggle">Start studying</button><button class="btn" id="timerReset">Reset timer</button></div>
+ <div class="studySummary"><div class="stat"><b id="studyToday">0m</b><small>Today</small></div><div class="stat"><b id="studyTotal">0h</b><small>Total study</small></div><div class="stat"><b id="studyAverage">0m</b><small>Daily average</small></div></div>
+ <div class="reportTabs"><button class="reportTab active" id="report7">7 Days</button><button class="reportTab" id="report30">30 Days</button></div>
+ <div class="muted" id="reportCaption">Last 7 days · Study time</div><div class="studyBars" id="studyBars"></div><div class="note" id="reportTotal"></div>
+</section>
+<section class="card" style="margin-top:13px" id="updateHistory"><h2>🧾 Update History</h2><div class="muted">Version 2 · 25 November 2026</div><div class="note">Study Stopwatch, daily study records, 7/30-day reports, bar graph, first-launch intro animation और in-app update prompt जोड़े गए। पुराने study planner, calendar, revision reminder और backup/restore को बनाए रखा गया।</div></section>
 </div><footer>Made for your Class 12 Board Mission · Offline-ready PWA</footer>
 <script>
 const START='2026-11-25',DAYS=60,KEY='boardMissionPWA_v1';
@@ -95,8 +109,12 @@ function init(){
  if(!state.targets)state.targets={};
  if(!state.revisions)state.revisions={};
  if(!state.revisionChecks)state.revisionChecks={};
+ // New study-tracker fields are added without touching existing progress.
+ if(!state.studyLog)state.studyLog={};
+ if(!state.studyTimer)state.studyTimer={startedAt:null,startDate:null};
  buildSchedules();
  render();
+ renderStudyUI();
 }
 function buildSchedules(){
  state.schedule={};
@@ -136,9 +154,68 @@ $('todayBtn').onclick=()=>{selectedDay=Math.max(0,Math.min(59,getTodayIndex()));
 $('addTarget').onclick=()=>{let t=$('targetInput').value.trim();if(!t)return;(state.targets[selectedDay]??=[]).push({text:t,done:false});$('targetInput').value='';save();render()};
 function exportData(){let blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='board-mission-backup.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
 $('backup').onclick=$('exportBtn').onclick=exportData;
-$('importFile').onchange=e=>{let f=e.target.files[0];if(!f)return;let r=new FileReader();r.onload=()=>{try{state=JSON.parse(r.result);if(!state.chapters||!state.schedule)throw Error();save();render();alert('Backup restored!')}catch(err){alert('यह backup file सही नहीं है।')}};r.readAsText(f)};
+$('importFile').onchange=e=>{let f=e.target.files[0];if(!f)return;let r=new FileReader();r.onload=()=>{try{state=JSON.parse(r.result);if(!state.chapters||!state.schedule)throw Error();if(!state.studyLog)state.studyLog={};if(!state.studyTimer)state.studyTimer={startedAt:null,startDate:null};save();render();renderStudyUI();alert('Backup restored!')}catch(err){alert('यह backup file सही नहीं है।')}};r.readAsText(f)};
 $('resetBtn').onclick=()=>{if(confirm('सारा progress reset करना है? पहले backup ले लें।')){localStorage.removeItem(KEY);state={};init()}};
-if('serviceWorker' in navigator && location.protocol!=='file:'){window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}))}
+
+// Study stopwatch: timestamps are persisted, so elapsed time survives app closure.
+let reportLength=7;
+function dateKey(d=new Date()){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
+function durationText(ms){let sec=Math.max(0,Math.floor(ms/1000)),h=Math.floor(sec/3600),m=Math.floor(sec%3600/60),s=sec%60;return [h,m,s].map(x=>String(x).padStart(2,'0')).join(':')}
+function prettyTime(ms){let mins=Math.floor(ms/60000),h=Math.floor(mins/60),m=mins%60;return h?`${h}h ${m}m`:`${m}m`}
+function currentSessionMs(){return state.studyTimer&&state.studyTimer.startedAt?Math.max(0,Date.now()-state.studyTimer.startedAt):0}
+function todayStudyMs(){let total=Number(state.studyLog[dateKey()]||0);if(state.studyTimer?.startedAt&&state.studyTimer.startDate===dateKey())total+=currentSessionMs();return total}
+function renderStudyUI(){
+ if(!$('studyPanel')||!state.studyLog)return;
+ let running=!!state.studyTimer?.startedAt;
+ $('timerStatus').textContent=running?'RUNNING':'STOPPED';
+ $('timerToggle').textContent=running?'Stop studying':'Start studying';
+ $('timerDisplay').textContent=durationText(currentSessionMs());
+ let entries=Object.values(state.studyLog).reduce((a,b)=>a+Number(b||0),0)+currentSessionMs();
+ let today=todayStudyMs();$('studyToday').textContent=prettyTime(today);$('studyTotal').textContent=prettyTime(entries);
+ let daysWithStudy=Object.values(state.studyLog).filter(x=>Number(x)>0).length+(running&&state.studyTimer.startDate===dateKey()&&!state.studyLog[dateKey()]?1:0);
+ $('studyAverage').textContent=prettyTime(daysWithStudy?entries/daysWithStudy:0);
+ let n=reportLength,now=new Date(),records=[];
+ for(let i=n-1;i>=0;i--){let d=new Date(now.getFullYear(),now.getMonth(),now.getDate()-i),k=dateKey(d),v=Number(state.studyLog[k]||0);if(state.studyTimer?.startedAt&&state.studyTimer.startDate===k)v+=currentSessionMs();records.push({d,k,v})}
+ let max=Math.max(1,...records.map(x=>x.v));
+ $('studyBars').innerHTML=records.map(x=>`<div class="studyBarCol" title="${x.k}: ${prettyTime(x.v)}"><div class="studyBar" style="height:${Math.max(2,x.v/max*88)}px"></div><small>${x.d.getDate()}</small></div>`).join('');
+ let sum=records.reduce((a,x)=>a+x.v,0);
+ $('reportCaption').textContent=`Last ${n} days · Study time`;
+ $('reportTotal').textContent=`${n}-day total: ${prettyTime(sum)} · Average: ${prettyTime(sum/n)} per day`;
+ $('report7').classList.toggle('active',n===7);$('report30').classList.toggle('active',n===30);
+}
+$('timerToggle').onclick=()=>{
+ if(!state.studyLog)state.studyLog={};
+ if(!state.studyTimer)state.studyTimer={startedAt:null,startDate:null};
+ if(!state.studyTimer.startedAt){state.studyTimer={startedAt:Date.now(),startDate:dateKey()};}
+ else{let elapsed=currentSessionMs(),k=state.studyTimer.startDate||dateKey();state.studyLog[k]=(Number(state.studyLog[k])||0)+elapsed;state.studyTimer={startedAt:null,startDate:null};}
+ save();renderStudyUI();
+};
+$('timerReset').onclick=()=>{if(confirm('चल रहा timer और इस session का समय reset करना है?')){state.studyTimer={startedAt:null,startDate:null};save();renderStudyUI()}};
+$('report7').onclick=()=>{reportLength=7;renderStudyUI()};
+$('report30').onclick=()=>{reportLength=30;renderStudyUI()};
+setInterval(()=>{if(state.studyTimer?.startedAt)renderStudyUI()},1000);
+
+// First-launch-only premium intro; independent from study progress and backup data.
+(function(){const k='boardMissionIntro2027Seen';const el=$('introScreen');if(localStorage.getItem(k)){el.remove();return}localStorage.setItem(k,'1');setTimeout(()=>{el.classList.add('hide');setTimeout(()=>el.remove(),550)},2500)})();
+
+// PWA update prompt. The user chooses when to activate the downloaded update.
+if('serviceWorker' in navigator && location.protocol!=='file:'){
+ window.addEventListener('load',async()=>{
+  try{
+   const reg=await navigator.serviceWorker.register('./sw.js');
+   const showUpdate=()=>{if(reg.waiting&&navigator.serviceWorker.controller)$('updateNotice').classList.remove('hidden')};
+   showUpdate();
+   reg.addEventListener('updatefound',()=>{
+    const worker=reg.installing;
+    worker.addEventListener('statechange',()=>{if(worker.state==='installed'&&navigator.serviceWorker.controller)showUpdate()});
+   });
+   $('updateNow').onclick=()=>{if(reg.waiting)reg.waiting.postMessage({type:'SKIP_WAITING'});};
+   let reloading=false;
+   navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!reloading){reloading=true;location.reload()}});
+   reg.update().catch(()=>{});
+  }catch(e){console.log('Service worker registration failed',e)}
+ });
+}
 init();
 </script>
 </body></html>
