@@ -1,4 +1,4 @@
-const CACHE='board-mission-v7';
+const CACHE='board-mission-v8';
 const FILES=['./','./index.html','./manifest.webmanifest','./icons/icon-192.png','./icons/icon-512.png'];
 
 self.addEventListener('install',event=>{
